@@ -21,7 +21,7 @@ git clone https://github.com/EthyMoney/pi-neopixel-http-api-controller.git
 
 ## Configuration
 
-You need to open the `main.py` file and set the `NUM_PIXELS` variable to the count of leds in your strip. You can also change the GPIO pin that the data pin of the strip is connected to by changing the `DATA_PIN` variable. This needs to be a PWM-capable pin like GPIO 12, GPIO 13, GPIO 18, GPIO 19. The default is GPIO pin 18, which is represented in the code as `board.D18`. You can find a list of GPIO pin numbers [here](https://www.raspberrypi.com/documentation/computers/os.html#gpio-and-the-40-pin-header).
+You need to open the `main.py` file and set the `NUM_PIXELS` variable to the count of leds in your strip. You can also change the GPIO pin that the data pin of the strip is connected to by changing the `DATA_PIN` variable. This needs to be a hardware PWM pin like GPIO 12, GPIO 13, GPIO 18, GPIO 19. The default is GPIO pin 18, which is represented in the code as `board.D18`. You can find a list of GPIO pin numbers [here](https://www.raspberrypi.com/documentation/computers/os.html#gpio-and-the-40-pin-header).
 
 ## Hardware Setup
 
@@ -69,11 +69,11 @@ The program runs a web server on port 5000 hosting a REST API and set of endpoin
 
 - `/rainbow_wave`: Starts a rainbow wave effect.
   - Method: `POST`
-  - Request body: None
+  - Request body: `{"speed": 50}` (optional speed parameter, 0-100%, default 50%)
 
 - `/alternating_colors`: Alternates between the specified colors.
   - Method: `POST`
-  - Request body: `{"color1": [255, 0, 0], "color2": [0, 255, 0]}` (for red and green)
+  - Request body: `{"color1": [255, 0, 0], "color2": [0, 255, 0], "speed": 50}` (optional speed parameter, 0-100%, default 50%)
 
 - `/set_brightness`: Sets the brightness of the LED strip.
   - Method: `POST`
@@ -81,11 +81,11 @@ The program runs a web server on port 5000 hosting a REST API and set of endpoin
 
 - `/color_loop`: Loops through the specified colors.
   - Method: `POST`
-  - Request body: `{"colors": [[255, 0, 0], [0, 255, 0], [0, 0, 255]]}` (for red, green, and blue)
+  - Request body: `{"colors": [[255, 0, 0], [0, 255, 0], [0, 0, 255]], "speed": 50}` (optional speed parameter, 0-100%, default 50%)
 
 - `/pulse_effect`: Starts a pulse effect with the specified color.
   - Method: `POST`
-  - Request body: `{"color": [255, 0, 0]}` (for red)
+  - Request body: `{"color": [255, 0, 0], "speed": 50}` (optional speed parameter, 0-100%, default 50%)
 
 - `/help`: Returns a list of available endpoints and their usage (basically what you are looking at right now)
   - Method: `GET`

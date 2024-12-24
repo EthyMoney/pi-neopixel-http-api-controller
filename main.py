@@ -1,8 +1,8 @@
 """
 Author: Logan Steffen
-Version: v1.1.0
+Version: v1.2.0
 Started: 11/01/2023
-Last Updated: 04/01/2024
+Last Updated: 12/24/2024
 License: MIT
 Program: WS2812B(neopixel) LED Strip Control Application for Raspberry Pi
 Description: This is a simple Python Flask application that controls an addressable RGB LED strip based on API requests.
@@ -12,15 +12,15 @@ Description: This is a simple Python Flask application that controls an addressa
               - /turn_off: Turns off the LED strip
                 -> no request body required
               - /rainbow_wave: Starts a rainbow wave effect
-                -> no request body required
+                -> Example request body: {"speed": 50} (optional speed parameter, 0-100%, default 50%)
               - /alternating_colors: Alternates between the specified colors
-                -> Example request body: {"color1": [255, 0, 0], "color2": [0, 255, 0]} (for red and green)
+                -> Example request body: {"color1": [255, 0, 0], "color2": [0, 255, 0], "speed": 50} (optional speed parameter, 0-100%, default 50%)
               - /set_brightness: Sets the brightness of the LED strip
                 -> Example request body: {"brightness": 100} (for 100% brightness)
               - /color_loop: Loops through the specified colors
-                -> Example request body: {"colors": [[255, 0, 0], [0, 255, 0], [0, 0, 255]]} (for red, green, and blue)
+                -> Example request body: {"colors": [[255, 0, 0], [0, 255, 0], [0, 0, 255]], "speed": 50} (optional speed parameter, 0-100%, default 50%)
               - /pulse_effect: Starts a pulse effect with the specified color
-                -> Example request body: {"color": [255, 0, 0]} (for red)
+                -> Example request body: {"color": [255, 0, 0], "speed": 50} (optional speed parameter, 0-100%, default 50%)
               - /help: Returns documentation of available endpoints and how to use them
 Note: 
 The standard behavior is that the strip will continue to always display the last color/effect/brightness until a new one is set.
@@ -93,9 +93,10 @@ def turn_off():
 
 
 # This is the rainbow wave effect
-def rainbow_cycle(wait):
+def rainbow_cycle(wait, speed=50):
     global animation_active
     animation_active = True
+    speed_factor = 1 - (speed / 100.0)
     while animation_active:
         for j in range(255):
             for i in range(NUM_PIXELS):
@@ -103,18 +104,19 @@ def rainbow_cycle(wait):
                 color = wheel(pixel_index & 255)
                 pixels[i] = color
             pixels.show()
-            time.sleep(wait)
+            time.sleep(wait * speed_factor)
 
 
 # Does the alternating colors animation by just calling set_color() with the specified colors
-def alternating_colors(color1, color2):
+def alternating_colors(color1, color2, speed=50):
     global animation_active
     animation_active = True
+    speed_factor = 1 - (speed / 100.0)
     while animation_active:
         set_color(color1)
-        time.sleep(0.5)
+        time.sleep(0.5 * speed_factor)
         set_color(color2)
-        time.sleep(0.5)
+        time.sleep(0.5 * speed_factor)
 
 
 def set_brightness(brightness):
@@ -124,17 +126,19 @@ def set_brightness(brightness):
     pixels.show()
 
 
-def color_loop(colors):
+def color_loop(colors, speed=50):
     global current_brightness, animation_active
+    speed_factor = 1 - (speed / 100.0)
     while animation_active:
         for color in colors:
             set_brightness(current_brightness)
             set_color(color)
-            time.sleep(1)
+            time.sleep(1 * speed_factor)
 
 
-def pulse_effect(color):
+def pulse_effect(color, speed=50):
     global current_brightness, animation_active
+    speed_factor = 1 - (speed / 100.0)
     while animation_active:
         for brightness in range(0, 256, 5):
             if not animation_active:
@@ -142,14 +146,14 @@ def pulse_effect(color):
                 return  # Exit the function if animation is stopped
             set_brightness(brightness)
             set_color(color)
-            time.sleep(0.1)
+            time.sleep(0.1 * speed_factor)
         for brightness in range(255, -1, -5):
             if not animation_active:
                 set_brightness(255)  # Reset brightness to 100%
                 return  # Exit the function if animation is stopped
             set_brightness(brightness)
             set_color(color)
-            time.sleep(0.1)
+            time.sleep(0.1 * speed_factor)
     set_brightness(255)  # Reset brightness to 100% after the pulse effect ends
 
 
@@ -167,21 +171,21 @@ def stop_current_animation():
 
 
 # Start the pulse effect in a separate thread
-def start_pulse_effect(color):
+def start_pulse_effect(color, speed=50):
     global current_animation, animation_active
     stop_current_animation()
     animation_active = True
-    current_animation = threading.Thread(target=pulse_effect, args=(color,))
+    current_animation = threading.Thread(target=pulse_effect, args=(color, speed))
     current_animation.daemon = True
     current_animation.start()
 
 
 # Start the color loop in a separate thread
-def start_color_loop(colors):
+def start_color_loop(colors, speed=50):
     global current_animation, animation_active
     stop_current_animation()
     animation_active = True
-    current_animation = threading.Thread(target=color_loop, args=(colors,))
+    current_animation = threading.Thread(target=color_loop, args=(colors, speed))
     current_animation.daemon = True
     current_animation.start()
 
@@ -248,13 +252,18 @@ def turn_off_endpoint():
 @app.route("/rainbow_wave", methods=["POST"])
 def rainbow_wave_endpoint():
     global current_animation, animation_active
-    stop_current_animation()
-    animation_active = False  # Stop alternating_colors animation
-    time.sleep(0.5)
-    current_animation = threading.Thread(target=rainbow_cycle, args=(0.01,))
-    current_animation.daemon = True
-    current_animation.start()
-    return jsonify({"message": "Rainbow wave activated"})
+    try:
+        data = request.get_json()
+        speed = data.get("speed", 50)  # Default to 50% if not provided
+        stop_current_animation()
+        animation_active = False  # Stop alternating_colors animation
+        time.sleep(0.5)
+        current_animation = threading.Thread(target=rainbow_cycle, args=(0.01, speed))
+        current_animation.daemon = True
+        current_animation.start()
+        return jsonify({"message": "Rainbow wave activated"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route("/alternating_colors", methods=["POST"])
@@ -264,10 +273,11 @@ def alternating_colors_endpoint():
         data = request.get_json()
         color1 = tuple(data["color1"])
         color2 = tuple(data["color2"])
+        speed = data.get("speed", 50)  # Default to 50% if not provided
         stop_current_animation()  # Stop any active animation
         animation_active = False  # Stop rainbow_wave animation
         current_animation = threading.Thread(
-            target=alternating_colors, args=(color1, color2)
+            target=alternating_colors, args=(color1, color2, speed)
         )
         current_animation.daemon = True
         current_animation.start()
@@ -294,7 +304,8 @@ def color_loop_endpoint():
         colors = [
             tuple(color) for color in data["colors"]
         ]  # List of colors to loop through
-        start_color_loop(colors)
+        speed = data.get("speed", 50)  # Default to 50% if not provided
+        start_color_loop(colors, speed)
         return jsonify({"message": "Color loop started"})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -307,7 +318,8 @@ def pulse_effect_endpoint():
         color = tuple(
             data["color"]
         )  # Color should be a list of RGB values, e.g., [255, 0, 0] for red
-        start_pulse_effect(color)
+        speed = data.get("speed", 50)  # Default to 50% if not provided
+        start_pulse_effect(color, speed)
         return jsonify({"message": "Pulse effect started"})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -350,13 +362,14 @@ def help_endpoint():
                 },
                 "/rainbow_wave": {
                     "description": "Starts a rainbow wave effect",
-                    "request body": {},
+                    "request body": {"speed": 50},  # Optional speed parameter (0-100%), default 50%
                 },
                 "/alternating_colors": {
                     "description": "Alternates between the specified colors",
                     "request body": {
                         "color1": [255, 0, 0],  # Red
                         "color2": [0, 255, 0],  # Green
+                        "speed": 50,  # Optional speed parameter (0-100%), default 50%
                     },
                 },
                 "/set_brightness": {
@@ -370,12 +383,16 @@ def help_endpoint():
                             [255, 0, 0],
                             [0, 255, 0],
                             [0, 0, 255],
-                        ]  # Red, green, and blue
+                        ],  # Red, green, and blue
+                        "speed": 50,  # Optional speed parameter (0-100%), default 50%
                     },
                 },
                 "/pulse_effect": {
                     "description": "Starts a pulse effect with the specified color",
-                    "request body": {"color": [255, 0, 0]},  # Red
+                    "request body": {
+                        "color": [255, 0, 0],  # Red
+                        "speed": 50,  # Optional speed parameter (0-100%), default 50%
+                    },
                 },
                 "/help": {
                     "description": "Returns documentation of available endpoints and how to use them (what you are seeing now)",
