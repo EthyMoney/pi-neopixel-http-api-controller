@@ -253,7 +253,7 @@ def turn_off_endpoint():
 def rainbow_wave_endpoint():
     global current_animation, animation_active
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         speed = data.get("speed", 50)  # Default to 50% if not provided
         stop_current_animation()
         animation_active = False  # Stop alternating_colors animation
