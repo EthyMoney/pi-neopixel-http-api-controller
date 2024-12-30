@@ -21,7 +21,7 @@ git clone https://github.com/EthyMoney/pi-neopixel-http-api-controller.git
 
 ## Configuration
 
-You need to open the `main.py` file and set the `NUM_PIXELS` variable to the count of leds in your strip. You can also change the GPIO pin that the data pin of the strip is connected to by changing the `DATA_PIN` variable. This needs to be a hardware PWM pin like GPIO 12, GPIO 13, GPIO 18, GPIO 19. The default is GPIO pin 18, which is represented in the code as `board.D18`. You can find a list of GPIO pin numbers [here](https://www.raspberrypi.com/documentation/computers/os.html#gpio-and-the-40-pin-header).
+You need to open the `main.py` file and set the `NUM_PIXELS` variable to the count of leds in your strip. You can also change the GPIO pin that the data pin of the strip is connected to by changing the `DATA_PIN` variable. This needs to be a hardware PWM pin like GPIO 12, GPIO 13, GPIO 18, GPIO 19. The default is GPIO pin 18, which is represented in the code as `board.D18`. You can find a list of GPIO pin numbers [HERE](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio-pins) and see the pinout diagram [HERE](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio).
 
 ## Hardware Setup
 
