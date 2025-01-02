@@ -46,7 +46,7 @@ import threading
 app = Flask(__name__)
 
 # Define the LED strip configuration
-# TODO: YOU NEED TO SET THIS TO THE CORRECT NUMBER OF PIXELS IN YOUR STRIP
+# TODO: YOU NEED TO SET THIS TO THE CORRECT NUMBER OF LEDS ("pixels") IN YOUR STRIP(s)
 NUM_PIXELS = 20
 DATA_PIN = board.D18
 pixels = neopixel.NeoPixel(DATA_PIN, NUM_PIXELS, auto_write=False)
@@ -66,13 +66,13 @@ current_brightness = 255  # Default to maximum brightness
 
 # Helper function for the initial flash used at startup to indicate that the program is running
 def initial_flash():
-    for _ in range(3):  # Flash green three times
-        set_color((0, 255, 0))
+    for _ in range(3):  # Flash blue three times
+        set_color((0, 0, 255))
         time.sleep(0.5)
         turn_off()
         time.sleep(0.5)
-    # Flash blue once
-    set_color((0, 0, 255))
+    # Flash green once
+    set_color((0, 255, 0))
     time.sleep(2)
     turn_off()  # light off until told otherwise by API request
 
