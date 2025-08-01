@@ -1,9 +1,11 @@
 {
   "apps": [
     {
-      "name": "led-control",
-      "script": "sudo python3 /path/to/your/main.py",
-      "instances": "1",
+      "name": "rest-led-controller",
+      "script": "main.py",
+      "interpreter": "python3",
+      "cwd": "/path/to/your/project/directory",
+      "exec_mode": "fork",
       "wait_ready": true,
       "autorestart": true,
       "max_restarts": 10

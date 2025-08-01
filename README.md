@@ -44,13 +44,43 @@ sudo python3 main.py
 
 **NOTE:** If you are using an older pi (like a pi 1), you may get an error on startup related to the revision code not being supported. This is because the GPIO library in use does not support the "old style" revision codes. You can get around this running with a specified "new style" reperesentation of the revision code as RPI_LGPIO_REVISION, like this for example: `sudo python3 RPI_LGPIO_REVISION="800012" main.py`
 
-For more info, see [here](https://rpi-lgpio.readthedocs.io/en/latest/differences.html#pi-revision)
+For running with pm2, add this option to the `process.json` file under the `cwd` entry:
+
+```json
+"env": {
+  "RPI_LGPIO_REVISION": "800012"
+},
+```
+
+For example:
+
+```json
+{
+  "apps": [
+    {
+      "name": "rest-led-controller",
+      "script": "main.py",
+      "interpreter": "python3",
+      "cwd": "/path/to/your/project/directory",
+      "env": {
+        "RPI_LGPIO_REVISION": "800012"
+      },
+      "exec_mode": "fork",
+      "wait_ready": true,
+      "autorestart": true,
+      "max_restarts": 10
+    }
+  ]
+}
+```
+
+For more info about this, see [here](https://rpi-lgpio.readthedocs.io/en/latest/differences.html#pi-revision)
 
 ## Running with PM2 (Recommended)
 
 PM2 is a process manager for Node.js applications. The repository includes a PM2 process definition json file, which allows you to run the app as a background process and automatically start it on boot.
 
-First, edit the `process.json` file to replace the path to the `main.py` file with the path to your copy of the repository on your pi.
+First, edit the `process.json` file to replace the path to the `main.py` file with the path to your copy of the repository on your pi. Also edit as above if you need the special `RPI_LGPIO_REVISION` environment variable for an old pi.
 
 Then, install node.js and PM2:
 
