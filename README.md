@@ -42,7 +42,7 @@ You can run the program directly with Python:
 sudo python3 main.py
 ```
 
-**NOTE:** If you are using an older pi (like a pi 1), you may get an error on startup related to the revision code not being supported. This is because the GPIO library in use does not support the "old style" revision codes. You can get around this running with a specified "new style" reperesentation of the revision code as RPI_LGPIO_REVISION, like this for example: `python3 RPI_LGPIO_REVISION="800012" main.py`
+**NOTE:** If you are using an older pi (like a pi 1), you may get an error on startup related to the revision code not being supported. This is because the GPIO library in use does not support the "old style" revision codes. You can get around this running with a specified "new style" reperesentation of the revision code as RPI_LGPIO_REVISION, like this for example: `sudo python3 RPI_LGPIO_REVISION="800012" main.py`
 
 For more info, see [here](https://rpi-lgpio.readthedocs.io/en/latest/differences.html#pi-revision)
 
