@@ -10,7 +10,14 @@ Follow these steps to install the necessary packages and libraries:
 sudo apt update
 sudo apt upgrade
 sudo apt install python3-pip git
-sudo pip3 install flask adafruit-circuitpython-neopixel
+```
+
+Set up your Python virtual environment, see [here](https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi#setup-virtual-environment-3157129) to see how
+
+Once it's set up, install the Python dependencies:
+
+```bash
+sudo pip3 install flask adafruit-circuitpython-neopixel rpi_ws281x
 ```
 
 Clone the repository to your Raspberry Pi:
@@ -34,6 +41,10 @@ You can run the program directly with Python:
 ```bash
 sudo python3 main.py
 ```
+
+**NOTE:** If you are using an older pi (like a pi 1), you may get an error on startup related to the revision code not being supported. This is because the GPIO library in use does not support the "old style" revision codes. You can get around this running with a specified "new style" reperesentation of the revision code as RPI_LGPIO_REVISION, like this for example: `python3 RPI_LGPIO_REVISION="800012" main.py`
+
+For more info, see [here](https://rpi-lgpio.readthedocs.io/en/latest/differences.html#pi-revision)
 
 ## Running with PM2 (Recommended)
 
