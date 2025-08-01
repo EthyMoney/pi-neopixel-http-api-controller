@@ -52,11 +52,13 @@ PM2 is a process manager for Node.js applications. The repository includes a PM2
 
 First, edit the `process.json` file to replace the path to the `main.py` file with the path to your copy of the repository on your pi.
 
-Then, install PM2:
+Then, install node.js and PM2:
 
 ```bash
 sudo apt update && sudo apt install npm -y && sudo npm install pm2 -g
 ```
+
+Note that you may need to manually install a newer version of node.js if you are on a 32-bit pi/os. See [this guide](https://www.instructables.com/Install-Nodejs-and-Npm-on-Raspberry-Pi) and download builds for your pi from the [unofficial builds project](https://unofficial-builds.nodejs.org) 
 
 Now, start the app with PM2, save the process list, and set to start on boot:
 
